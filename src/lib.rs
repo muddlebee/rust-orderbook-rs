@@ -49,7 +49,7 @@ mod tests {
         let order1 = orders::new_market_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             2.0,
             SystemTime::now(),
         );
@@ -82,7 +82,7 @@ mod tests {
         let order1 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             10.0,
             1.0,
             SystemTime::now(),
@@ -91,7 +91,7 @@ mod tests {
         let order2 = orders::new_market_order_request(
             order_asset,
             price_asset,
-            OrderSide::Ask,
+            OrderSide::Sell,
             0.5,
             SystemTime::now(),
         );
@@ -138,7 +138,7 @@ mod tests {
         let order1 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             10.0,
             1.0,
             SystemTime::now(),
@@ -147,7 +147,7 @@ mod tests {
         let order2 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             12.0,
             1.0,
             SystemTime::now(),
@@ -156,7 +156,7 @@ mod tests {
         let order3 = orders::new_market_order_request(
             order_asset,
             price_asset,
-            OrderSide::Ask,
+            OrderSide::Sell,
             1.5,
             SystemTime::now(),
         );
@@ -222,7 +222,7 @@ mod tests {
         let order1 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             10.0,
             2.0,
             SystemTime::now(),
@@ -252,7 +252,7 @@ mod tests {
         let order1 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             10.0,
             1.0,
             SystemTime::now(),
@@ -261,7 +261,7 @@ mod tests {
         let order2 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Ask,
+            OrderSide::Sell,
             9.0,
             0.5,
             SystemTime::now(),
@@ -309,7 +309,7 @@ mod tests {
         let order1 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             10.0,
             1.0,
             SystemTime::now(),
@@ -318,7 +318,7 @@ mod tests {
         let order2 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Ask,
+            OrderSide::Sell,
             9.0,
             0.5,
             SystemTime::now(),
@@ -356,7 +356,7 @@ mod tests {
         let order3 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Ask,
+            OrderSide::Sell,
             8.0,
             0.5,
             SystemTime::now(),
@@ -405,7 +405,7 @@ mod tests {
         let order1 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             10.0,
             1.0,
             SystemTime::now(),
@@ -417,7 +417,7 @@ mod tests {
         let order2 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Ask,
+            OrderSide::Sell,
             12.0,
             0.5,
             SystemTime::now(),
@@ -426,7 +426,7 @@ mod tests {
         let order3 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Ask,
+            OrderSide::Sell,
             12.5,
             2.5,
             SystemTime::now(),
@@ -442,7 +442,7 @@ mod tests {
         let order4 = orders::new_limit_order_request(
             order_asset,
             price_asset,
-            OrderSide::Bid,
+            OrderSide::Buy,
             14.0,
             1.5,
             SystemTime::now(),

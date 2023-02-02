@@ -1,8 +1,9 @@
 
 extern crate orderbook;
-
-use std::time::SystemTime;
+extern crate rand;
+use std::time::{Instant, SystemTime};
 use orderbook::{Orderbook, OrderSide, orders};
+use rand::Rng;
 
 
 #[derive(PartialEq, Eq, Debug, Copy, Clone)]
@@ -26,17 +27,18 @@ fn parse_asset(asset: &str) -> Option<BrokerAsset> {
 
 
 fn main() {
+    let now = Instant::now();
     let mut orderbook = Orderbook::new(BrokerAsset::BTC, BrokerAsset::USD);
     let order_asset = parse_asset("BTC").unwrap();
     let price_asset = parse_asset("USD").unwrap();
 
     // create order requests
-    let order_list =
+    let mut order_list =
         vec![
             orders::new_limit_order_request(
                 order_asset,
                 price_asset,
-                OrderSide::Bid,
+                OrderSide::Buy,
                 0.98,
                 5.0,
                 SystemTime::now()
@@ -45,18 +47,18 @@ fn main() {
             orders::new_limit_order_request(
                 order_asset,
                 price_asset,
-                OrderSide::Ask,
+                OrderSide::Sell,
                 1.02,
                 1.0,
                 SystemTime::now()
             ),
 
-            orders::amend_order_request(1, OrderSide::Bid, 0.99, 4.0, SystemTime::now()),
+            orders::amend_order_request(1, OrderSide::Buy, 0.99, 4.0, SystemTime::now()),
 
             orders::new_limit_order_request(
                 order_asset,
                 price_asset,
-                OrderSide::Bid,
+                OrderSide::Buy,
                 1.01,
                 0.4,
                 SystemTime::now()
@@ -65,34 +67,49 @@ fn main() {
             orders::new_limit_order_request(
                 order_asset,
                 price_asset,
-                OrderSide::Ask,
+                OrderSide::Sell,
                 1.03,
                 0.5,
                 SystemTime::now()
             ),
 
-            orders::new_market_order_request(order_asset, price_asset, OrderSide::Bid, 1.0, SystemTime::now()),
+            orders::new_market_order_request(order_asset, price_asset, OrderSide::Buy, 1.0, SystemTime::now()),
 
             orders::new_limit_order_request(
                 order_asset,
                 price_asset,
-                OrderSide::Ask,
+                OrderSide::Sell,
                 1.05,
                 0.5,
                 SystemTime::now()
             ),
 
-            orders::limit_order_cancel_request(4, OrderSide::Ask),
+            orders::limit_order_cancel_request(4, OrderSide::Sell),
 
             orders::new_limit_order_request(
                 order_asset,
                 price_asset,
-                OrderSide::Bid,
+                OrderSide::Buy,
                 1.06,
                 0.6,
                 SystemTime::now()
             ),
         ];
+
+    // for loop for random order requests
+    for _ in 0..10000 {
+        let side = if rand::random::<bool>() { OrderSide::Buy } else { OrderSide::Sell };
+        let order = orders::new_limit_order_request(
+            order_asset,
+            price_asset,
+            side,
+            rand::thread_rng().gen_range(1000..1200) as f64,
+            rand::thread_rng().gen_range(1000..2000) as f64,
+            SystemTime::now()
+        );
+        order_list.push(order);
+    }
+
 
     // processing
     for order in order_list {
@@ -105,4 +122,7 @@ fn main() {
             println!("Spread => not available\n");
         }
     }
+
+    let elapsed = now.elapsed();
+    println!("Elapsed: {:?} ", elapsed);
 }

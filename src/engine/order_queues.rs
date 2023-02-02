@@ -19,13 +19,13 @@ impl Ord for OrderIndex {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.price < other.price {
             match self.order_side {
-                OrderSide::Bid => Ordering::Less,
-                OrderSide::Ask => Ordering::Greater,
+                OrderSide::Buy => Ordering::Less,
+                OrderSide::Sell => Ordering::Greater,
             }
         } else if self.price > other.price {
             match self.order_side {
-                OrderSide::Bid => Ordering::Greater,
-                OrderSide::Ask => Ordering::Less,
+                OrderSide::Buy => Ordering::Greater,
+                OrderSide::Sell => Ordering::Less,
             }
         } else {
             // FIFO
@@ -151,6 +151,7 @@ impl<T> OrderQueue<T> {
     /* Internal methods */
 
 
+    //TODO:optimze modify_current_order
     /// Used internally when current order is partially matched.
     ///
     /// Note: do not modify price or time, cause index doesn't change!
@@ -231,7 +232,7 @@ mod test {
 
 
     fn get_queue_bids() -> OrderQueue<TestOrder> {
-        let mut bid_queue = get_queue_empty(OrderSide::Bid);
+        let mut bid_queue = get_queue_empty(OrderSide::Buy);
 
         assert!(bid_queue.insert(
             1,
@@ -259,7 +260,7 @@ mod test {
 
 
     fn get_queue_asks() -> OrderQueue<TestOrder> {
-        let mut ask_queue = get_queue_empty(OrderSide::Ask);
+        let mut ask_queue = get_queue_empty(OrderSide::Sell);
         assert!(ask_queue.insert(
             1,
             1.01,
@@ -286,7 +287,7 @@ mod test {
 
     #[test]
     fn queue_operations_insert_unique() {
-        let mut bid_queue = get_queue_empty(OrderSide::Bid);
+        let mut bid_queue = get_queue_empty(OrderSide::Buy);
         assert_eq!(bid_queue.peek(), None);
 
         // insert unique

@@ -71,8 +71,8 @@ where
 {
     order_asset: Asset,
     price_asset: Asset,
-    bid_queue: OrderQueue<Order<Asset>>,
-    ask_queue: OrderQueue<Order<Asset>>,
+    buy_queue: OrderQueue<Order<Asset>>,
+    sell_queue: OrderQueue<Order<Asset>>,
     seq: sequence::TradeSequence,
     order_validator: OrderRequestValidator<Asset>,
 }
@@ -84,26 +84,19 @@ where
 {
     /// Create new orderbook for pair of assets
     ///
-    /// # Examples
-    ///
-    /// Basic usage:
-    /// ```
-    /// let mut orderbook = Orderbook::new(Asset::BTC, Asset::USD);
-    /// let result = orderbook.process_order(OrderRequest::MarketOrder{  });
-    /// assert_eq!(orderbook)
     /// ```
     // todo fix doc test!
     pub fn new(order_asset: Asset, price_asset: Asset) -> Self {
         Orderbook {
             order_asset,
             price_asset,
-            bid_queue: OrderQueue::new(
-                OrderSide::Bid,
+            buy_queue: OrderQueue::new(
+                OrderSide::Buy,
                 MAX_STALLED_INDICES_IN_QUEUE,
                 ORDER_QUEUE_INIT_CAPACITY,
             ),
-            ask_queue: OrderQueue::new(
-                OrderSide::Ask,
+            sell_queue: OrderQueue::new(
+                OrderSide::Sell,
                 MAX_STALLED_INDICES_IN_QUEUE,
                 ORDER_QUEUE_INIT_CAPACITY,
             ),
@@ -117,7 +110,7 @@ where
         }
     }
 
-
+    /// Process order request
     pub fn process_order(&mut self, order: OrderRequest<Asset>) -> OrderProcessingResult {
         // processing result accumulator
         let mut proc_result: OrderProcessingResult = vec![];
@@ -203,8 +196,8 @@ where
 
     /// Get current spread as a tuple: (bid, ask)
     pub fn current_spread(&mut self) -> Option<(f64, f64)> {
-        let bid = self.bid_queue.peek()?.price;
-        let ask = self.ask_queue.peek()?.price;
+        let bid = self.buy_queue.peek()?.price;
+        let ask = self.sell_queue.peek()?.price;
         Some((bid, ask))
     }
 
@@ -223,8 +216,8 @@ where
         // get copy of the current limit order
         let opposite_order_result = {
             let opposite_queue = match side {
-                OrderSide::Bid => &mut self.ask_queue,
-                OrderSide::Ask => &mut self.bid_queue,
+                OrderSide::Buy => &mut self.sell_queue,
+                OrderSide::Sell => &mut self.buy_queue,
             };
             opposite_queue.peek().cloned()
         };
@@ -271,27 +264,30 @@ where
         qty: f64,
         ts: SystemTime,
     ) {
-        // take a look at current opposite limit order
-        let opposite_order_result = {
+        // match with opposite orders
+        let match_opposite_order = {
             let opposite_queue = match side {
-                OrderSide::Bid => &mut self.ask_queue,
-                OrderSide::Ask => &mut self.bid_queue,
+                //opposite order match
+                OrderSide::Buy => &mut self.sell_queue,
+                OrderSide::Sell => &mut self.buy_queue,
             };
+            //fetch the best order by orderId from the queue and return a copy
             opposite_queue.peek().cloned()
         };
 
-        if let Some(opposite_order) = opposite_order_result {
+        if let Some(match_order) = match_opposite_order {
             let could_be_matched = match side {
-                // verify bid/ask price overlap
-                OrderSide::Bid => price >= opposite_order.price,
-                OrderSide::Ask => price <= opposite_order.price,
+                // if the price of the new order is greater than the price of the opposite order, then the new order could be matched
+                // or vice versa
+                OrderSide::Buy => price >= match_order.price,
+                OrderSide::Sell => price <= match_order.price,
             };
 
             if could_be_matched {
                 // match immediately
                 let matching_complete = self.order_matching(
                     results,
-                    &opposite_order,
+                    &match_order,
                     order_id,
                     order_asset,
                     price_asset,
@@ -309,7 +305,7 @@ where
                         price_asset,
                         side,
                         price,
-                        qty - opposite_order.qty,
+                        qty - match_order.qty,
                         ts,
                     );
                 }
@@ -353,8 +349,8 @@ where
         ts: SystemTime,
     ) {
         let order_queue = match side {
-            OrderSide::Bid => &mut self.bid_queue,
-            OrderSide::Ask => &mut self.ask_queue,
+            OrderSide::Buy => &mut self.buy_queue,
+            OrderSide::Sell => &mut self.sell_queue,
         };
 
         if order_queue.amend(
@@ -390,8 +386,8 @@ where
         side: OrderSide,
     ) {
         let order_queue = match side {
-            OrderSide::Bid => &mut self.bid_queue,
-            OrderSide::Ask => &mut self.ask_queue,
+            OrderSide::Buy => &mut self.buy_queue,
+            OrderSide::Sell => &mut self.sell_queue,
         };
 
         if order_queue.cancel(order_id) {
@@ -420,8 +416,8 @@ where
         ts: SystemTime,
     ) {
         let order_queue = match side {
-            OrderSide::Bid => &mut self.bid_queue,
-            OrderSide::Ask => &mut self.ask_queue,
+            OrderSide::Buy => &mut self.buy_queue,
+            OrderSide::Sell => &mut self.sell_queue,
         };
         if !order_queue.insert(
             order_id,
@@ -484,8 +480,8 @@ where
             // modify unmatched part of the opposite limit order
             {
                 let opposite_queue = match side {
-                    OrderSide::Bid => &mut self.ask_queue,
-                    OrderSide::Ask => &mut self.bid_queue,
+                    OrderSide::Buy => &mut self.sell_queue,
+                    OrderSide::Sell => &mut self.buy_queue,
                 };
                 opposite_queue.modify_current_order(Order {
                     order_id: opposite_order.order_id,
@@ -523,8 +519,8 @@ where
             // remove filled limit order from the queue
             {
                 let opposite_queue = match side {
-                    OrderSide::Bid => &mut self.ask_queue,
-                    OrderSide::Ask => &mut self.bid_queue,
+                    OrderSide::Buy => &mut self.sell_queue,
+                    OrderSide::Sell => &mut self.buy_queue,
                 };
                 opposite_queue.pop();
             }
@@ -557,8 +553,8 @@ where
             // remove filled limit order from the queue
             {
                 let opposite_queue = match side {
-                    OrderSide::Bid => &mut self.ask_queue,
-                    OrderSide::Ask => &mut self.bid_queue,
+                    OrderSide::Buy => &mut self.sell_queue,
+                    OrderSide::Sell => &mut self.buy_queue,
                 };
                 opposite_queue.pop();
             }
@@ -585,13 +581,29 @@ mod test {
     #[test]
     fn cancel_nonexisting() {
         let mut orderbook = Orderbook::new(Asset::BTC, Asset::USD);
-        let request = orders::limit_order_cancel_request(1, OrderSide::Bid);
+        let request = orders::limit_order_cancel_request(1, OrderSide::Buy);
         let mut result = orderbook.process_order(request);
-
         assert_eq!(result.len(), 1);
         match result.pop().unwrap() {
             Err(_) => (),
             _ => panic!("unexpected events"),
         }
     }
+
+    //process new market order request from Orderbook
+    #[test]
+    fn process_new_market_order(){
+        let mut orderbook = Orderbook::new(Asset::BTC, Asset::USD);
+
+        //Create request for the new_market_order_request function in orders.rs
+        let request =  orders::new_market_order_request(Asset::BTC, Asset::USD, OrderSide::Buy, 2.0, SystemTime::now());
+        let mut result = orderbook.process_order(request);
+        println!("result => {:?}", result);
+
+       //assert results
+        assert_eq!(result.len(), 2);
+
+        //TODO: assert the rest of the results
+    }
+
 }

@@ -43,8 +43,10 @@ where
 }
 
 
-/* Constructors */
-
+/*
+price is skipped for market orders
+as it is not used for matching
+*/
 
 /// Create request for the new market order
 pub fn new_market_order_request<Asset>(

@@ -3,8 +3,8 @@ use std::fmt::Debug;
 
 #[derive(Debug, Copy, Clone)]
 pub enum OrderSide {
-    Bid,
-    Ask,
+    Buy,
+    Sell,
 }
 
 #[derive(Debug, Clone)]
