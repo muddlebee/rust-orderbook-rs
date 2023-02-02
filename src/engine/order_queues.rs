@@ -56,7 +56,8 @@ impl Eq for OrderIndex {}
 /// Public methods
 pub struct OrderQueue<T> {
     // use Option in order to replace heap in mutable borrow
-    idx_queue: Option<BinaryHeap<OrderIndex>>,
+    //queue to maintain order index
+    index_order_queue: Option<BinaryHeap<OrderIndex>>,
     orders: HashMap<u64, T>,
     op_counter: u64,
     max_stalled: u64,
@@ -70,7 +71,7 @@ impl<T> OrderQueue<T> {
     /// Queue is universal and could be used for both asks and bids
     pub fn new(side: OrderSide, max_stalled: u64, capacity: usize) -> Self {
         OrderQueue {
-            idx_queue: Some(BinaryHeap::with_capacity(capacity)),
+            index_order_queue: Some(BinaryHeap::with_capacity(capacity)),
             orders: HashMap::with_capacity(capacity),
             op_counter: 0,
             max_stalled,
@@ -87,7 +88,7 @@ impl<T> OrderQueue<T> {
         if self.orders.contains_key(&order_id) {
             self.orders.get(&order_id)
         } else {
-            self.idx_queue.as_mut().unwrap().pop()?;
+            self.index_order_queue.as_mut().unwrap().pop()?;
             self.peek()
         }
     }
@@ -95,7 +96,7 @@ impl<T> OrderQueue<T> {
 
     pub fn pop(&mut self) -> Option<T> {
         // remove order index from queue in any case
-        let order_id = self.idx_queue.as_mut()?.pop()?.id;
+        let order_id = self.index_order_queue.as_mut()?.pop()?.id;
 
         if self.orders.contains_key(&order_id) {
             self.orders.remove(&order_id)
@@ -113,7 +114,7 @@ impl<T> OrderQueue<T> {
         }
 
         // store new order
-        self.idx_queue.as_mut().unwrap().push(OrderIndex {
+        self.index_order_queue.as_mut().unwrap().push(OrderIndex {
             id,
             price,
             timestamp: ts,
@@ -179,17 +180,17 @@ impl<T> OrderQueue<T> {
 
     /// Remove dangling indices without orders from queue
     fn remove_stalled(&mut self) {
-        if let Some(idx_queue) = self.idx_queue.take() {
+        if let Some(idx_queue) = self.index_order_queue.take() {
             let mut active_orders = idx_queue.into_vec();
             active_orders.retain(|order_ptr| self.orders.contains_key(&order_ptr.id));
-            self.idx_queue = Some(BinaryHeap::from(active_orders));
+            self.index_order_queue = Some(BinaryHeap::from(active_orders));
         }
     }
 
 
     /// Recreate order-index queue with changed index info
     fn rebuild_idx(&mut self, id: u64, price: f64, ts: time::SystemTime) {
-        if let Some(idx_queue) = self.idx_queue.take() {
+        if let Some(idx_queue) = self.index_order_queue.take() {
             // deconstruct queue
             let mut active_orders = idx_queue.into_vec();
             // remove old idx value
@@ -203,14 +204,14 @@ impl<T> OrderQueue<T> {
             });
             // construct new queue
             let mut amended_queue = BinaryHeap::from(active_orders);
-            self.idx_queue = Some(amended_queue);
+            self.index_order_queue = Some(amended_queue);
         }
     }
 
 
     /// Return ID of current order in queue
     fn get_current_order_id(&self) -> Option<u64> {
-        let order_id = self.idx_queue.as_ref()?.peek()?;
+        let order_id = self.index_order_queue.as_ref()?.peek()?;
         Some(order_id.id)
     }
 }
