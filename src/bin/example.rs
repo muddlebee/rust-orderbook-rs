@@ -97,11 +97,24 @@ fn main() {
         ];
 
     // for loop for random order requests
-    for _ in 0..10000 {
+    for _ in 0..50000 {
         let side = if rand::random::<bool>() { OrderSide::Buy } else { OrderSide::Sell };
         let order = orders::new_limit_order_request(
             order_asset,
             price_asset,
+            side,
+            rand::thread_rng().gen_range(1199..1200) as f64,
+            rand::thread_rng().gen_range(1000..2000) as f64,
+            SystemTime::now()
+        );
+        order_list.push(order);
+    }
+
+    // for loop for random order requests for amend order requests
+/*    for idx in 0..10000 {
+        let side = if rand::random::<bool>() { OrderSide::Buy } else { OrderSide::Sell };
+        let order = orders::amend_order_request(
+            rand::thread_rng().gen_range(1..10000) as u64,
             side,
             rand::thread_rng().gen_range(1000..1200) as f64,
             rand::thread_rng().gen_range(1000..2000) as f64,
@@ -109,7 +122,7 @@ fn main() {
         );
         order_list.push(order);
     }
-
+*/
 
     // processing
     for order in order_list {

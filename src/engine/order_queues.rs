@@ -52,7 +52,7 @@ impl PartialEq for OrderIndex {
 
 impl Eq for OrderIndex {}
 
-
+//TODO:remove HashMap and use only BinaryHeap
 /// Public methods
 pub struct OrderQueue<T> {
     // use Option in order to replace heap in mutable borrow
@@ -210,6 +210,8 @@ impl<T> OrderQueue<T> {
 
 
     /// Return ID of current order in queue
+    // how to get current order id?
+    // explain why we need this method and how it works in the comment
     fn get_current_order_id(&self) -> Option<u64> {
         let order_id = self.index_order_queue.as_ref()?.peek()?;
         Some(order_id.id)
@@ -254,6 +256,7 @@ mod test {
             time::SystemTime::now(),
             TestOrder { name: "high bid second" },
         ));
+        // fetching the highest big order using binary heap peek
         assert_eq!(bid_queue.peek().unwrap().name, "high bid first");
 
         bid_queue

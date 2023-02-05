@@ -11,9 +11,9 @@ use super::validation::OrderRequestValidator;
 
 
 const MIN_SEQUENCE_ID: u64 = 1;
-const MAX_SEQUENCE_ID: u64 = 1000;
+const MAX_SEQUENCE_ID: u64 = 100000;
 const MAX_STALLED_INDICES_IN_QUEUE: u64 = 10;
-const ORDER_QUEUE_INIT_CAPACITY: usize = 500;
+const ORDER_QUEUE_INIT_CAPACITY: usize = 500000;
 
 
 pub type OrderProcessingResult = Vec<Result<Success, Failed>>;
@@ -64,7 +64,7 @@ pub enum Failed {
     OrderNotFound(u64),
 }
 
-
+//TODO:optimize buy_queue and sell_queue
 pub struct Orderbook<Asset>
 where
     Asset: Debug + Clone + Copy + Eq,
@@ -311,6 +311,7 @@ where
                 }
 
             } else {
+                //TODO:optimize queue
                 // just insert new order in queue
                 self.store_new_limit_order(
                     results,
@@ -403,7 +404,10 @@ where
 
     /* Helpers */
 
-
+    /*
+    insert new order in OrderQueue
+    if the order is already in the queue, then return an error
+    */
     fn store_new_limit_order(
         &mut self,
         results: &mut OrderProcessingResult,
