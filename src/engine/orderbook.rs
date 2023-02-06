@@ -213,12 +213,14 @@ where
         side: OrderSide,
         qty: f64,
     ) {
-        // get copy of the current limit order
+        /// get copy of the current limit order
         let opposite_order_result = {
             let opposite_queue = match side {
                 OrderSide::Buy => &mut self.sell_queue,
                 OrderSide::Sell => &mut self.buy_queue,
             };
+            //TODO:optimize
+            ///fetch the best order by orderId from the queue and return a copy
             opposite_queue.peek().cloned()
         };
 
@@ -264,14 +266,15 @@ where
         qty: f64,
         ts: SystemTime,
     ) {
-        // match with opposite orders
+        /// match with opposite orders
         let match_opposite_order = {
             let opposite_queue = match side {
                 //opposite order match
                 OrderSide::Buy => &mut self.sell_queue,
                 OrderSide::Sell => &mut self.buy_queue,
             };
-            //fetch the best order by orderId from the queue and return a copy
+            //TODO:optimize
+            ///fetch the best order by orderId from the queue and return a copy
             opposite_queue.peek().cloned()
         };
 
@@ -311,8 +314,8 @@ where
                 }
 
             } else {
+                ///if the order could not be matched or partially fulfilled, then it is added back to the queue
                 //TODO:optimize queue
-                // just insert new order in queue
                 self.store_new_limit_order(
                     results,
                     order_id,

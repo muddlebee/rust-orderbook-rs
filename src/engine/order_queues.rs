@@ -80,6 +80,12 @@ impl<T> OrderQueue<T> {
     }
 
 
+    /**
+     * Get current order ID
+     *
+     * If queue is empty, return None
+     */
+    //TODO: optimize peak
     pub fn peek(&mut self) -> Option<&T> {
         // get best order ID
         let order_id = self.get_current_order_id()?;
@@ -209,9 +215,9 @@ impl<T> OrderQueue<T> {
     }
 
 
-    /// Return ID of current order in queue
-    // how to get current order id?
-    // explain why we need this method and how it works in the comment
+    /**
+    return order ID on basis of Min Max heap see impl Ord for OrderIndex
+    */
     fn get_current_order_id(&self) -> Option<u64> {
         let order_id = self.index_order_queue.as_ref()?.peek()?;
         Some(order_id.id)
