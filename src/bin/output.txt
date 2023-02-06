@@ -1,0 +1,45 @@
+C:/Users/91824/.cargo/bin/cargo.exe run --color=always --package orderbook --bin example
+
+Order => NewLimitOrder { order_asset: BTC, price_asset: USD, side: Buy, price: 0.98, qty: 5.0, ts: SystemTime { intervals: 133201785055386152 } }
+Processing => [Ok(Accepted { id: 1, order_type: Limit, ts: SystemTime { intervals: 133201785055388737 } })]
+Spread => not available
+
+Order => NewLimitOrder { order_asset: BTC, price_asset: USD, side: Sell, price: 1.02, qty: 1.0, ts: SystemTime { intervals: 133201785055386154 } }
+Processing => [Ok(Accepted { id: 2, order_type: Limit, ts: SystemTime { intervals: 133201785055391976 } })]
+Spread => bid: 0.98, ask: 1.02
+
+Order => AmendOrder { id: 1, side: Buy, price: 0.99, qty: 4.0, ts: SystemTime { intervals: 133201785055386154 } }
+Processing => [Ok(Amended { id: 1, price: 0.99, qty: 4.0, ts: SystemTime { intervals: 133201785055394096 } })]
+Spread => bid: 0.99, ask: 1.02
+
+Order => NewLimitOrder { order_asset: BTC, price_asset: USD, side: Buy, price: 1.01, qty: 0.4, ts: SystemTime { intervals: 133201785055386156 } }
+Processing => [Ok(Accepted { id: 3, order_type: Limit, ts: SystemTime { intervals: 133201785055396888 } })]
+Spread => bid: 1.01, ask: 1.02
+
+Order => NewLimitOrder { order_asset: BTC, price_asset: USD, side: Sell, price: 1.03, qty: 0.5, ts: SystemTime { intervals: 133201785055386156 } }
+Processing => [Ok(Accepted { id: 4, order_type: Limit, ts: SystemTime { intervals: 133201785055399244 } })]
+Spread => bid: 1.01, ask: 1.02
+
+Order => NewMarketOrder { order_asset: BTC, price_asset: USD, side: Buy, qty: 1.0, ts: SystemTime { intervals: 133201785055386156 } }
+Processing => [Ok(Accepted { id: 5, order_type: Market, ts: SystemTime { intervals: 133201785055401657 } }), Ok(Filled { order_id: 5, side: Buy, order_type: Market, price: 1.02, qt
+y: 1.0, ts: SystemTime { intervals: 133201785055401673 } }), Ok(Filled { order_id: 2, side: Sell, order_type: Limit, price: 1.02, qty: 1.0, ts: SystemTime { intervals: 133201785055401673 } })]
+Spread => bid: 1.01, ask: 1.03
+
+Order => NewLimitOrder { order_asset: BTC, price_asset: USD, side: Sell, price: 1.05, qty: 0.5, ts: SystemTime { intervals: 133201785055386157 } }
+Processing => [Ok(Accepted { id: 6, order_type: Limit, ts: SystemTime { intervals: 133201785055405057 } })]
+Spread => bid: 1.01, ask: 1.03
+
+Order => CancelOrder { id: 4, side: Sell }
+Processing => [Ok(Cancelled { id: 4, ts: SystemTime { intervals: 133201785055407454 } })]
+Spread => bid: 1.01, ask: 1.05
+
+Order => NewLimitOrder { order_asset: BTC, price_asset: USD, side: Buy, price: 1.06, qty: 0.6, ts: SystemTime { intervals: 133201785055386157 } }
+Processing => [Ok(Accepted { id: 7, order_type: Limit, ts: SystemTime { intervals: 133201785055409828 } }), Ok(PartiallyFilled { order_id: 7, side: Buy, order_type: Limit, price: 1
+.05, qty: 0.5, ts: SystemTime { intervals: 133201785055409849 } }), Ok(Filled { order_id: 6, side: Sell, order_type: Limit, price: 1.05, qty: 0.5, ts: SystemTime { intervals: 133201785055409849 } })]
+Spread => not available
+
+Elapsed: 3.3512ms
+
+Process finished with exit code 0
+
+

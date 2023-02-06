@@ -97,7 +97,7 @@ fn main() {
         ];
 
     // for loop for random order requests
-    for _ in 0..50000 {
+/*    for _ in 0..50 {
         let side = if rand::random::<bool>() { OrderSide::Buy } else { OrderSide::Sell };
         let order = orders::new_limit_order_request(
             order_asset,
@@ -108,7 +108,7 @@ fn main() {
             SystemTime::now()
         );
         order_list.push(order);
-    }
+    }*/
 
     // for loop for random order requests for amend order requests
 /*    for idx in 0..10000 {
